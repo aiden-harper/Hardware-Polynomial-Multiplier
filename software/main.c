@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define MOD 2239 // Modulus q
-#define ROOT 3   // Primitive root for NTT
+#define MOD 3229 // Modulus q
+#define ROOT 6   // Primitive root for NTT
 #define N 256    // Polynomial degree n
 
 // Function to calculate (a * b) % mod
