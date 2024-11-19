@@ -1,3 +1,21 @@
+# This is based on this paper: https://eprint.iacr.org/2024/585.pdf
+from math import log2
+
+# bitReversal reverse the bits of a given integer of a given bitwidth
+def bitReversal(integer, bits):
+    # Create format string 'width'
+    width = '0'+str(bits)+'b'
+    # Create binary representation of integer of bits width
+    binary = format(integer, width)
+    # Initialize reversed binary string
+    rBin = ''
+    # Loop over all bits
+    for i in range(bits):
+        # Assign reversed bits accordingly
+        rBin += binary[bits-i-1]
+    # Return integer representation of reversed bits
+    return int(rBin, 2)
+    
 # ntt computes the forward NTT given a modulo q, length n,
 # polynomial coefficients f, and twiddle factors psis
 # this NTT is based on the Cooley-Tukey normal input, bit-reversed output
@@ -6,6 +24,8 @@ def ntt(q, n, f, psis):
     outf = f
     # length is the amount of inputs for each butterfly group
     length = int(n/2)
+    # current psi tracker
+    psi = 1
     # loop while there are 2+ inputs (for the butterflies)
     while(length >= 1):
         # start at the 0th index
@@ -17,7 +37,7 @@ def ntt(q, n, f, psis):
             # loop over the current batch of inputs (this is the CT butterfly)
             while(j < start+length):
                 # find the current tiwddle factor
-                twid = psis[start+length]
+                twid = psis[psi]
                 u = outf[j]
                 v = outf[j+length]
                 # compute even indexed output
@@ -28,6 +48,7 @@ def ntt(q, n, f, psis):
                 j += 1
             # increment start to the start of the next batch of inputs
             start += 2*length
+            psi += 1
         # divide length in half for next round of recursion
         length = int(length/2)
     # return outf = NTT(f)
@@ -36,11 +57,13 @@ def ntt(q, n, f, psis):
 # intt computes the inverse NTT given a modulo q, length n,
 # polynomial coefficients fhat, and twiddle factors invPsis
 # this INTT is based on the Gentleman-Sande bit-reversed input, normal output
-def intt(q, n, fhat, invPsis):
+def intt(q, n, fhat, psiInvs):
     # set output polynomial to input polynomial
     outf = fhat
     # length is the amount of inputs for each butterfly group
     length = 1
+    # current psi tracker
+    psi = 1
     # loop while there are <= n/2 inputs (for the butterflies)
     while(length <= int(n/2)):
         # start at the 0th index
@@ -52,7 +75,7 @@ def intt(q, n, fhat, invPsis):
             # loop over the current batch of inputs (this is the GS butterfly)
             while(j < start+length):
                 # find the current tiwddle factor
-                twid = invPsis[start+length]
+                twid = psiInvs[psi]
                 u = outf[j]
                 v = outf[j+length]
                 # compute even indexed output
@@ -63,6 +86,7 @@ def intt(q, n, fhat, invPsis):
                 j += 1
             # increment start to the start of the next batch of inputs
             start += 2*length
+            psi += 1
         # multiply length by 2 for next round of recursion
         length = int(length*2)
     # find inverse of n for scaling
@@ -82,44 +106,65 @@ def main():
     n = 8
 
     # twiddle factors
-    w = 1213
     psi = 527
     # calculate twiddle factors
+    psisNorm = []
+    for i in range(n):
+        psisNorm.append((psi**i)%q)
+    # sort psis in bit reverse order
     psis = []
-    for i in range(2*n):
-        psis.append((psi**i)%q)
+    for i in range(n):
+        psis.append(psisNorm[bitReversal(i,int(log2(n)))])
+    
     # find inverse psi
     psiInv = 0
     # loop until inverse is found
     while((psi*psiInv)%q != 1):
         psiInv += 1
     # calculate inverse twiddle factors
-    psiInvs = []
-    for i in range(2*n):
-        psiInvs.append((psiInv**i)%q)
+    psiInvsNorm = []
+    for i in range(n):
+        psiInvsNorm.append((psiInv**i)%q)
+    # sort psiInvs in bit reverse order
+    psiInvsTemp = []
+    for i in range(n):
+        psiInvsTemp.append(psiInvsNorm[bitReversal(i,int(log2(n)))])
+    # mirror the bit reversed psiInvs
+    psiInvRev = []
+    for i in range(n):
+        psiInvRev.append(psiInvsTemp[n-i-1])
+    # reorder mirroerd psiInvs groups
+    group = n/2
+    psiInvs = [1]
+    index = 0
+    for i in range(int(log2(n))):
+        for j in range(int(group)):
+            psiInvs.append(psiInvRev[int(group)-j-1+int(index)])
+        index += group
+        group /= 2
     
     # input array f
     f = [1, 2, 3, 4, 5, 6, 7, 8]
+    print(psis)
     print('f =', f)
     
     # NTT computation
     fhat = ntt(q, n, f, psis)
-    print('\nntt(f) =', fhat)
+    print('ntt(f) =', fhat)
     
     # INTT computation
     invf = intt(q, n, fhat, psiInvs)
-    print('\nintt(ntt(f)) =', invf)
+    print('intt(ntt(f)) =', invf)
 
     # polynomial multiplication check
-    # This sadly doesn't work. for some reason the even outputs are incorrect
     a = [1, 2, 3, 4, 5, 6, 7, 8]
     b = [1, 2, 3, 4, 5, 6, 7, 8]
-    print('a =', a)
+    print('\na =', a)
     print('b =', b)
     ahat = ntt(q, n, a, psis)
     bhat = ntt(q, n, b, psis)
     c = []
     for i in range(n):
         c.append((ahat[i]*bhat[i])%q)
-    print('\nc = aXb =', intt(q, n, c, psiInvs))
+    print('c = aXb =', intt(q, n, c, psiInvs))
 main()
