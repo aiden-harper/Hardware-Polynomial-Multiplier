@@ -19,11 +19,13 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-// parameters: Q = modulo number, BITS = # bits for inputs/outputs
-module CTbutterfly #(parameter BITS = 12, parameter Q = 3329)
+// Cooley-Tukey butterfly unit
+// PARAMETERS - Q: Modulus, BITS: Bitwidth
+module CTbutterfly #(parameter BITS = 13, parameter Q = 7681)
                 (input logic [BITS-1:0] in0, in1, w, output logic [BITS-1:0] out0, out1);
-        // assign even output to even input plus twiddle factor times odd input all mod Q
+        // u = in0, v = in1
+        // out0 = (u + w*v)%q
         assign out0 = (in0 + w*in1)%Q;
-        // assign odd output to even input minus twiddle factor times odd input all mod Q
+        // out1 = (u - w*v)%q      (note: -w = Q-w due to the ring)
         assign out1 = (in0 + (Q-w)*in1)%Q;
 endmodule

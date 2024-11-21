@@ -22,6 +22,7 @@
 // NTTPolyMult takes two coeffecient representations of polynomials and twiddle factors (normal and inverse) as input and uses the 
 // Kyber version 2 NTT to multiply them.
 // PARAMETERS - Q: Modulus, BITS: Bitwidth, N: Polynomial length, invN: Inverse of N    note: (invN*N)%Q=1
+// Default parameters are from Kyber version 2
 module NTTPolyMult #(parameter Q = 7681, parameter BITS = 13, parameter N = 256, parameter invN = 7651)
             (input logic [BITS-1:0] a[0:N-1], b[0:N-1], psis[0:N-1], invPsis[0:N-1], output logic [BITS-1:0] c[0:N-1]);
             // Wires to connect between modules

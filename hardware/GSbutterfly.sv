@@ -19,11 +19,13 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-
-module GSbutterfly #(parameter BITS = 12, parameter Q = 3329)
+// Gentleman-Sande butterfly unit
+// PARAMETERS - Q: Modulus, BITS: Bitwidth
+module GSbutterfly #(parameter BITS = 13, parameter Q = 7681)
                 (input logic [BITS-1:0] in0, in1, w, output logic [BITS-1:0] out0, out1);
-        // assign even output to even input plus twiddle factor times odd input all mod Q
+        // u = in0, v = in1
+        // out0 = (u + v)%q
         assign out0 = (in0 + in1)%Q;
-        // assign odd output to even input minus twiddle factor times odd input all mod Q
+        // out1 = ((u - v)*w)%q     (note: -v = Q-v due to the ring)
         assign out1 = ((in0 + (Q-in1))*w)%Q;
 endmodule
