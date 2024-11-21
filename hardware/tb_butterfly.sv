@@ -3,9 +3,9 @@
 // Company: 
 // Engineer: 
 // 
-// Create Date: 10/23/2024 05:00:38 PM
+// Create Date: 10/23/2024 04:37:32 PM
 // Design Name: 
-// Module Name: tb_NTT
+// Module Name: tb_butterfly
 // Project Name: 
 // Target Devices: 
 // Tool Versions: 
@@ -20,12 +20,13 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module tb_NTT;
-    parameter BITS = 13, N = 8, Q = 7681;
-    reg [BITS-1:0] f[0:N-1], psis[0:N-1];
-    wire [BITS-1:0] fhat[0:N-1];
-    NTT uut(.f(f), .psis(psis), .fhat(fhat));
-    initial
-    begin
-    end
+module tb_butterfly;
+    reg [31:0] in[0:1], w;
+    wire [31:0] out[0:1];
+    butterfly uut(.in(in), .w(w), .out(out));
+    initial 
+        begin
+            #1 in[0] <= 1; in[1] <= 3; w <= 1;
+            #1 in[0] <= 2; in[1] <= 4; w <= 1;
+        end
 endmodule
