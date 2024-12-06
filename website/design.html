@@ -40,40 +40,55 @@
 </section>
 
 <section>
-    <h3>NTT (Number Theoretic Transform)</h3>
+    <h3>Number Theoretic Transform (NTT)</h3>
     <p>
         The Number Theoretic Transform (NTT) is a very efficient method of performing polynomial 
         multiplication by performing a discrete fourier transform over a polynomial ring.
         This reduces the number of individual multiplications that need to be performed.
     </p>
 
-    <h4>Cooley-Tukey Butterfly (Fast-Fourier Transform)</h4>
+    <h4>Fast-Fourier Transform (FFT)</h4>
     <p>
         The NTT transforms two polynomials to the frequency-domain, 
         where they can be pointwise multiplied, and transformed back to the time-domain using the INTT, 
         yielding the result of the polynomial multiplication. 
-        This transformation is optimized using a Fast-Fourier Transform (FFT) algorithm, the Cooley-Tukey 
-        butterfly in our case. To use this algorithm for the NTT, modular arithmetic is performed after each step to 
-        ensure the results are kept within a finite field.
+        This transformation is optimized using a Fast-Fourier Transform (FFT) algorithm. The FFT uses
+        the Cooley Tukey (CT) Butterfly algorithm for computing the NTT and the Gentleman-Sande (GS) Butterfly 
+        algorithm for computing the INTT.
     </p>
-    <img src="./pictures/design_images/butterfly_graphic.png" alt="Butterfly Graphic"
+
+    <img src="./pictures/design_images/fft_diagram.jpg" alt="FFT Diagram"
+        style="width: 60%; max-width: 300px; margin: 20px auto; display: block; border: 2px solid #ddd; border-radius: 10px; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);">
+</section>
+
+<section>
+    <h3>Fast-NTT Design</h3>
+
+    <p>
+        The hardware design for the fast-NTT CT butterfly and the fast-NTT module, respectively. This schematic shows
+        the 4-input fast-NTT, however, we can expand this to any size. Additionally, a slight modification to this design
+        will yield the fast-INTT GT butterfly.
+    </p>
+
+    <img src="./pictures/design_images/ct_butterfly_schematic.png" alt="Butterfly RTL"
+        style="width: 60%; max-width: 600px; margin: 20px auto; display: block; border: 2px solid #ddd; border-radius: 10px; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);">
+    <img src="./pictures/design_images/4in_ntt_schematic.png" alt="4-Input NTT Block Diagram"
         style="width: 60%; max-width: 600px; margin: 20px auto; display: block; border: 2px solid #ddd; border-radius: 10px; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);">
 </section>
 
 <section>
-    <h3>Current Progress</h3>
+    <h3>NTT-Based Polynomial Mutliplier</h3>
 
     <p>
-        Shown here is the development of the SystemVerilog code for the NTT. 
-        We started by creating a butterfly unit that takes two inputs and performs the Cooley-Tukey FFT 
-        algorithm using modular arithmetic. Then, we used this butterfly module to create a 4 input NTT module. 
-        This was accomplished by creating 4 instances of the butterfly module and reorganizing the inputs and outputs. 
-        For our final design, we are working on creating a module that can change input sizes with the use of a parameter. 
-        This is a similar concept to the 4 input design but it uses a for loop.
+        The hardware design for an NTT-based polynomial multiplier in Verilog/SystemVerilog. 
+        The design uses CRYSTALS-Kyber Version 2 parameters: n=256 and q=7681. The following schematics are 
+        the 8-input Polynomial Multiplier, NTT Module, and INTT module (8-bit is shown for easier visualization).
     </p>
 
-    <img src="./pictures/design_images/butterfly_rtl.png" alt="Butterfly RTL"
+    <img src="./pictures/design_images/8in_poly_mult_schematic.png" alt="8-Input Polynomial Mutlipier"
         style="width: 60%; max-width: 600px; margin: 20px auto; display: block; border: 2px solid #ddd; border-radius: 10px; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);">
-    <img src="./pictures/design_images/ntt_4_block_diagram.png" alt="4-Input NTT Block Diagram"
+    <img src="./pictures/design_images/8in_ntt_schematic.png" alt="8-Input NTT Block Diagram"
+        style="width: 60%; max-width: 600px; margin: 20px auto; display: block; border: 2px solid #ddd; border-radius: 10px; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);">
+    <img src="./pictures/design_images/8in_intt_schematic.png" alt="8-Input INTT Block Diagram"
         style="width: 60%; max-width: 600px; margin: 20px auto; display: block; border: 2px solid #ddd; border-radius: 10px; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);">
 </section>
