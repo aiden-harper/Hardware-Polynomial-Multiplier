@@ -21,13 +21,12 @@
 
 
 module tb_INTT;
-    parameter BITS = 13, N = 8, Q = 7681, invN = 6721;
-    reg [BITS-1:0] f[0:N-1], psis[0:N-1];
-    wire [BITS-1:0] fhat[0:N-1];
-    INTT uut(.fhat(f), .invPsis(psis), .f(fhat));
+    parameter BITS = 40, N = 8, Q = 3329, invN = 2913;
+    reg [BITS-1:0] b[0:N-1], invPsis[0:N/2-1];
+    wire [BITS-1:0] f[0:N-1];
+    INTT uut(.fhat(b), .invPsis(invPsis), .f(f));
     initial
     begin
-    // input: 2182x^0 + 5766x^1 + 4218x^2 + 4669x^3 + 2324x^4 + 6216x^5 + 1179x^6 + 4178x^7
-	#50 f[0] <= 2182; f[1] <= 5766; f[2] <= 4218; f[3] <= 4669; f[4] <= 2324; f[5] <= 6216; f[6] <= 1179; f[7] <= 4178; psis[0] <= 1; psis[1] <= 3383; psis[2] <= 1925; psis[3] <= 6468; psis[4] <= 583; psis[5] <= 5953; psis[6] <= 849; psis[7] <= 7154;
-	end
+    #50 b[0] <= 36; b[1] <= 3325; b[2] <= 254; b[3] <= 3067; b[4] <= 427; b[5] <= 81; b[6] <= 3240; b[7] <= 2894; invPsis[0] <= 1; invPsis[1] <= 1729; invPsis[2] <= 2580; invPsis[3] <= 3289; 
+    end
 endmodule

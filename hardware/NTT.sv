@@ -21,8 +21,8 @@
 
 // Forward Number Theoretic Transfrom for Kyber version 2 based on normal input, bit reversed output Cooley-Tukey butterfly
 // PARAMETERS - Q: Modulus, BITS: Bitwidth, N: Polynomial length
-module NTT #(parameter Q = 7681, parameter BITS = 13, parameter N = 256)
-            (input logic [BITS-1:0] f[0:N-1], psis[0:N-1], output logic [BITS-1:0] fhat[0:N-1]);
+module NTT #(parameter Q = 3329, parameter BITS = 40, parameter N = 8)
+            (input logic [BITS-1:0] f[0:N-1], psis[0:N/2-1], output logic [BITS-1:0] fhat[0:N-1]);
             // outf wires connect between the butterfly stages
             // $clog2(N) = stages
             wire [BITS-1:0] outf[0:$clog2(N)][0:N-1];
@@ -49,11 +49,24 @@ module NTT #(parameter Q = 7681, parameter BITS = 13, parameter N = 256)
                                     .in1(outf[stage][j+(N/(2**(stage+1)))]),
                                     .out0(outf[stage+1][j]),
                                     .out1(outf[stage+1][j+(N/(2**(stage+1)))]),
-                                    .w(psis[2**stage+start/(2*N/(2**(stage+1)))]));
+                                    .w(psis[start/(2*N/(2**(stage+1)))]));
                         end
                     end
                 end
             endgenerate
-            // Finally, assign the output fhat to the final outf wire
-            assign fhat = outf[$clog2(N)];
+            assign fhat[0] = outf[$clog2(N)][0]%Q;
+
+            assign fhat[1] = outf[$clog2(N)][1]%Q;
+
+            assign fhat[2] = outf[$clog2(N)][2]%Q;
+
+            assign fhat[3] = outf[$clog2(N)][3]%Q;
+
+            assign fhat[4] = outf[$clog2(N)][4]%Q;
+
+            assign fhat[5] = outf[$clog2(N)][5]%Q;
+
+            assign fhat[6] = outf[$clog2(N)][6]%Q;
+
+            assign fhat[7] = outf[$clog2(N)][7]%Q;
 endmodule

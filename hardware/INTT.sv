@@ -21,8 +21,8 @@
 
 // Inverse Number Theoretic Transfrom for Kyber version 2 based on bit reversed input, normal output Gentleman-Sande butterfly
 // PARAMETERS - Q: Modulus, BITS: Bitwidth, N: Polynomial length, invN: Inverse of N    note: (invN*N)%Q=1
-module INTT #(parameter Q = 7681, parameter BITS = 13, parameter N = 256, parameter invN = 256)
-            (input logic [BITS-1:0] fhat[0:N-1], invPsis[0:N-1], output logic [BITS-1:0] f[0:N-1]);
+module INTT #(parameter Q = 3329, parameter BITS = 40, parameter N = 8, parameter invN = 2913)
+            (input logic [BITS-1:0] fhat[0:N-1], invPsis[0:N/2-1], output logic [BITS-1:0] f[0:N-1]);
             // outf wires connect between the butterfly stages
             // $clog2(N) = stages
             wire [BITS-1:0] outf[0:$clog2(N)][0:N-1];
@@ -49,7 +49,7 @@ module INTT #(parameter Q = 7681, parameter BITS = 13, parameter N = 256, parame
                                     .in1(outf[stage+1][j+(N/(2**(stage+1)))]),
                                     .out0(outf[stage][j]),
                                     .out1(outf[stage][j+(N/(2**(stage+1)))]),
-                                    .w(invPsis[2**stage+start/(2*N/(2**(stage+1)))]));
+                                    .w(invPsis[start/(2*N/(2**(stage+1)))]));
                         end
                     end
                 end
