@@ -19,54 +19,51 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-// Forward Number Theoretic Transfrom for Kyber version 2 based on normal input, bit reversed output Cooley-Tukey butterfly
+// Forward Number Theoretic Transfrom for Kyber version 3 based on normal input, bit reversed output Cooley-Tukey butterfly
 // PARAMETERS - Q: Modulus, BITS: Bitwidth, N: Polynomial length
-module NTT #(parameter Q = 3329, parameter BITS = 40, parameter N = 8)
-            (input logic [BITS-1:0] f[0:N-1], psis[0:N/2-1], output logic [BITS-1:0] fhat[0:N-1]);
-            // outf wires connect between the butterfly stages
+module NTT #(parameter Q = 3329, parameter BITS = 12, parameter N = 256)
+            (input logic clk, reset, [BITS-1:0] f[0:N-1], psis[0:N/2-1],
+             output logic [BITS-1:0] fhat[0:N-1]);
             // $clog2(N) = stages
-            wire [BITS-1:0] outf[0:$clog2(N)][0:N-1];
-            // Assign the first outf to input polynomial f
-            assign outf[0] = f;
-            // Itteratively generate the NTT
-            generate
-            // Loop over each stage
-            for(genvar stage = 0; stage < $clog2(N); stage = stage+1)
+            reg [$clog2(N):0] start;
+            reg [$clog2(N)-1:0] length;
+            reg [BITS-1:0] inf[0:N-1];
+            reg [$clog2(N)-1:0] omegaj;
+            reg [$clog2(N)-1:0] j;
+            
+            always_ff @(posedge clk)
                 begin
-                //(N/(2**(stage+1))) = length (distance between even and odd inputs for the butterflies, depends on grouping)
-                // start represents the beginning of butterfly group (start = start + 2*length)
-                // Loop over each butterfly grouping
-                for(genvar start = 0; start < N; start = start + 2*(N/(2**(stage+1))))
+                if(reset)
                     begin
-                    // Loop over inputs for current butterfly grouping (j is current input index)
-                    for(genvar j = start; j < start+(N/(2**(stage+1))); j = j + 1)
+                    // reset so initialize inf register
+                    inf <= f;
+                    // length determines how far the inputs of the butterfly unit are from each other
+                    length <= N/2;
+                    // start determines which groups are being processed
+                    start <= 0;
+                    j <= 0;
+                    omegaj <= 0;
+                    end
+                else if(length >= 1)
+                    begin
+                    // Cooley-Tukey butterfly
+                    fhat[j] = (inf[j] + psis[omegaj]*inf[j+length])%Q;
+                    fhat[j+length] = (inf[j] + (Q-psis[omegaj])*inf[j+length])%Q;
+                    j = j + 1;
+                    if(j >= start + length) 
                         begin
-                        // Cooley-Tukey butterfly with inputs/outputs j (even) and j+length (odd)
-                        // The input psis are preprocessed in the correct bit-reversed order
-                        // start/(2*N/(2**(stage+1))) = start/2*length (this counts which butterfly group is being processed)
-                        CTbutterfly #(.BITS(BITS), .Q(Q))butterfly(
-                                    .in0(outf[stage][j]),
-                                    .in1(outf[stage][j+(N/(2**(stage+1)))]),
-                                    .out0(outf[stage+1][j]),
-                                    .out1(outf[stage+1][j+(N/(2**(stage+1)))]),
-                                    .w(psis[start/(2*N/(2**(stage+1)))]));
+                        start = start + length*2;
+                        omegaj = omegaj + 1;
+                        j = start;
+                        end
+                    if(start >= N)
+                        begin
+                        start = 0;
+                        j = 0;
+                        length = length/2;
+                        omegaj = 0;
+                        inf = fhat;
                         end
                     end
                 end
-            endgenerate
-            assign fhat[0] = outf[$clog2(N)][0]%Q;
-
-            assign fhat[1] = outf[$clog2(N)][1]%Q;
-
-            assign fhat[2] = outf[$clog2(N)][2]%Q;
-
-            assign fhat[3] = outf[$clog2(N)][3]%Q;
-
-            assign fhat[4] = outf[$clog2(N)][4]%Q;
-
-            assign fhat[5] = outf[$clog2(N)][5]%Q;
-
-            assign fhat[6] = outf[$clog2(N)][6]%Q;
-
-            assign fhat[7] = outf[$clog2(N)][7]%Q;
 endmodule
